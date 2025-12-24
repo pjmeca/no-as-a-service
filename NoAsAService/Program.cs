@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Threading.RateLimiting;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ var reasons = languages.ToDictionary(
 builder.Services.AddRateLimiter(options =>
 {
     const int permitLimit = 120;
-    
+
     options.OnRejected = async (context, token) =>
     {
         context.HttpContext.Response.StatusCode = 429; // HTTP 429
@@ -41,7 +42,34 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// Swagger
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new()
+        {
+            Title = "No-as-a-Service API",
+            Version = "v1",
+            Description = "No-as-a-Service (NaaS) is a simple API that returns a random rejection reason." +
+                          "Use it when you need a realistic excuse, a fun “no”, or want to simulate being turned down in style.",
+            Contact = new OpenApiContact()
+            {
+                Name = "Pablo Meca",
+                Email = "hello@pjmeca.com",
+                Url = new Uri("https://github.com/pjmeca")
+            }
+        });
+    });
+
 var app = builder.Build();
+
+// Enable Swagger
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.EnableTryItOutByDefault();
+});
 
 // Use rate limiter
 app.UseRateLimiter();
