@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Threading.RateLimiting;
+﻿using System.Threading.RateLimiting;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 HashSet<string> languages = ["en", "es"];
 var reasons = languages.ToDictionary(
     x => x,
-    x => JsonSerializer.Deserialize<string[]>(File.ReadAllText(Path.Combine("reasons", $"{x}.json")))!);
+    x => File.ReadAllLines(Path.Combine("reasons", $"{x}.txt")));
 
 // Configure rate-limit: 120 req/min by IP (or CF-Connecting-IP)
 builder.Services.AddRateLimiter(options =>
@@ -85,7 +84,7 @@ app.MapGet("/", (string? lang = null) =>
 
     var random = new Random();
     var reason = reasons[language][random.Next(reasons[language].Length)];
-    return Results.Ok(reason);
+    return Results.Text(reason, "text/plain", statusCode: StatusCodes.Status200OK);
 })
 .RequireRateLimiting("PerIp");
 
