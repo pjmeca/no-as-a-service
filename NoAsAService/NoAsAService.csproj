@@ -4,6 +4,26 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Default: no AOT (development) -->
+    <PublishAot>false</PublishAot>
+    <TrimMode>full</TrimMode>
+    <PublishSingleFile>false</PublishSingleFile>
+    <RuntimeIdentifier></RuntimeIdentifier>
+    <PublishReadyToRun>false</PublishReadyToRun>
+</PropertyGroup>
+
+<!-- AOT settings only if EnableAot=true (Docker/Production) -->
+<PropertyGroup Condition="'$(EnableAot)'=='true'">
+    <PublishAot>true</PublishAot>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <PublishReadyToRun>false</PublishReadyToRun>
+</PropertyGroup>
+
+<!-- Define constant NATIVEAOT only when publishing AOT -->
+<PropertyGroup>
+    <DefineConstants Condition="'$(PublishAot)'=='true'">NATIVEAOT</DefineConstants>
 </PropertyGroup>
 
 <ItemGroup>

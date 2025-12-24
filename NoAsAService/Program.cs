@@ -42,6 +42,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 // Swagger
+#if !NATIVEAOT
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
@@ -60,15 +61,18 @@ builder.Services
             }
         });
     });
+#endif
 
 var app = builder.Build();
 
 // Enable Swagger
+#if !NATIVEAOT
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.EnableTryItOutByDefault();
 });
+#endif
 
 // Use rate limiter
 app.UseRateLimiter();
