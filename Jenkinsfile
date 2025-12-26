@@ -6,7 +6,7 @@ pipeline {
     parameters {
         string(
             name: 'HOST_PORT',
-            defaultValue: '5000',
+            defaultValue: '31325',
             description: 'Host port to expose the container'
         )
     }
