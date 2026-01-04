@@ -1,7 +1,5 @@
-# ❌ No-as-a-Service (Multilingual .NET Edition)
-
 <p align="center">
-  <img src="assets/imgs/naas-with-no-logo-bunny.png" width="800" alt="No-as-a-Service Banner" width="70%"/>
+  <img src="assets/banner.jpg" alt="No-as-a-Service (Multilingual .NET Edition) Banner"/>
 </p>
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/pjmeca/no-as-a-service?style=flat&logo=github&label=Star%20this%20repo!)](https://github.com/pjmeca/no-as-a-service)
