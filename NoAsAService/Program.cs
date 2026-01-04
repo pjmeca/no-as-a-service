@@ -8,7 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 HashSet<string> languages = ["en", "es"];
 var reasons = languages.ToDictionary(
     x => x,
-    x => File.ReadAllLines(Path.Combine("reasons", $"{x}.txt"), Encoding.UTF8));
+    x => File.ReadAllLines(Path.Combine("reasons", $"{x}.txt"), Encoding.UTF8)
+        .Where(line => !string.IsNullOrWhiteSpace(line))
+        .ToArray());
 
 // Configure rate-limit: 120 req/min by IP (or CF-Connecting-IP)
 builder.Services.AddRateLimiter(options =>
