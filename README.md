@@ -1,159 +1,147 @@
-# ❌ No-as-a-Service
+# ❌ No-as-a-Service (Multilingual .NET Edition)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hotheadhacker/no-as-a-service/main/assets/imgs/naas-with-no-logo-bunny.png" width="800" alt="No-as-a-Service Banner" width="70%"/>
+  <img src="assets/imgs/naas-with-no-logo-bunny.png" width="800" alt="No-as-a-Service Banner" width="70%"/>
 </p>
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/pjmeca/no-as-a-service?style=flat&logo=github&label=Star%20this%20repo!)](https://github.com/pjmeca/no-as-a-service)
+[![Docker Image Version (tag)](https://img.shields.io/docker/v/pjmeca/no-as-a-service/latest?logo=docker)](https://hub.docker.com/r/pjmeca/no-as-a-service)
 
 Ever needed a graceful way to say “no”?  
-This tiny API returns random, generic, creative, and sometimes hilarious rejection reasons — perfectly suited for any scenario: personal, professional, student life, dev life, or just because.
+This tiny API returns random, generic, creative, and sometimes hilarious rejection reasons — now fully rewritten in **.NET 10** with **Native AOT** support for minimal runtime overhead.
 
-Built for humans, excuses, and humor.
-
-<!-- GitAds Sponsorship Badge -->
-<p align="center">
-  <a href="https://docs.gitads.dev/">
-    <img src="https://gitads.dev/assets/images/sponsor/camos/camo-3.png" alt="Sponsored by GitAds" />
-  </a>
-</p>
-
-<p align="center">
-  This project is <strong>sponsored by <a href="https://docs.gitads.dev/docs/getting-started/publishers">GitAds</a></strong>.<br>
-  You can get your GitHub repository sponsored too — <a href="https://docs.gitads.dev/docs/getting-started/publishers">create your account now</a>.
-</p>
+Built for humans, excuses, humor, and fast deployments.
 
 ---
 
 ## 🚀 API Usage
 
-**Base URL**
+**Base URL** (if self-hosted via Docker):
 ```
-https://naas.isalman.dev/no
+https://naas.pjmeca.com
 ```
 
 **Method:** `GET`  
-**Rate Limit:** `120 requests per minute per IP`
+**Rate Limit:** 120 requests per minute per IP (configurable in the code)
 
 ### 🔄 Example Request
 ```http
-GET /no
+GET /
 ```
 
-### ✅ Example Response
-```json
-{
-  "reason": "This feels like something Future Me would yell at Present Me for agreeing to."
-}
+### ✅ Example Response (plain text)
+
+```txt
+Not even if there were free donuts.
 ```
 
 Use it in apps, bots, landing pages, Slack integrations, rejection letters, or wherever you need a polite (or witty) no.
+
+### 🌍 Multi-language support
+
+This version supports **multiple languages**.
+
+The language can be selected using the `lang` query parameter:
+
+```http
+GET /?lang=en
+GET /?lang=es
+```
+
+At the moment, the following languages are available:
+
+* 🇬🇧 English (`en`)
+* 🇪🇸 Spanish (`es`)
+
+If no `lang` parameter is provided, *English* is used by default.
+
+Each language is backed by its own text file inside the `reasons/` directory, making it easy to add new languages without changing any code.
+
+---
+
+## 🐳 Run with Docker (no setup required)
+
+If you just want to run the API without building anything locally, a prebuilt image is available on Docker Hub.
+
+```bash
+docker run -p 5000:5000 pjmeca/no-as-a-service
+```
+
+The API will be available at:
+
+```
+http://localhost:5000
+```
+
+No Node.js, no .NET SDK, no build steps required.
 
 ---
 
 ## 🛠️ Self-Hosting
 
-Want to run it yourself? It’s lightweight and simple.
+This .NET version is easy to run locally or in Docker.
 
-### 1. Clone this repository
+### 1. Clone the repository
+
 ```bash
-git clone https://github.com/hotheadhacker/no-as-a-service.git
+git clone https://github.com/pjmeca/no-as-a-service.git
 cd no-as-a-service
 ```
 
-### 2. Install dependencies
+### 2. Development (Windows / Rider / VSCode)
+
 ```bash
-npm install
+dotnet run
 ```
 
-### 3. Start the server
+* Runs without Native AOT, fully debuggable.
+* Access the API at `http://localhost:5000`.
+
+### 3. Production / Docker (Native AOT)
+
 ```bash
-npm start
+docker build -t pjmeca/no-as-a-service .
+docker run -p 5000:5000 pjmeca/no-as-a-service
 ```
 
-The API will be live at:
-```
-http://localhost:3000/no
-```
-
-You can also change the port using an environment variable:
-```bash
-PORT=5000 npm start
-```
+* Produces a single, optimized native binary.
+* Lightweight image ready for fast deployments.
+* API available at `http://localhost:5000`.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-no-as-service/
-├── index.js            # Express API
-├── reasons.json        # 1000+ universal rejection reasons
-├── package.json
-├── .devcontainer.json  # VS Code / Github devcontainer setup
+NoAsAService/
+├── Program.cs          # Minimal API in .NET 10
+├── reasons/            # One text file per language with rejection lines
+├── NoAsAService.csproj
+├── Dockerfile
 └── README.md
 ```
 
 ---
 
-## 📦 package.json
+## 🐳 Dockerfile Highlights
 
-For reference, here’s the package config:
-
-```json
-{
-  "name": "no-as-service",
-  "version": "1.0.0",
-  "description": "A lightweight API that returns random rejection or no reasons.",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "author": "hotheadhacker",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.2",
-    "express-rate-limit": "^7.0.0"
-  }
-}
-```
+* Multi-stage build: SDK for compilation, minimal runtime for execution.
+* Native AOT + single-file binary for production.
+* Port 5000 exposed and configurable via `ASPNETCORE_URLS`.
 
 ---
 
-## ⚓ Devcontainer
+## ⚓ Development Notes
 
-If you open this repo in Github Codespaces, it will automatically use `.devcontainer.json` to set up your environment.  If you open it in VSCode, it will ask you if you want to reopen it in a container.
+* In development, reflection-based features are enabled.
+* In production, reflection-based features are disabled because of Native AOT. "Reasons" are loaded directly from text files.
+* Rate limiting is optional but implemented per IP (or `CF-Connecting-IP` when behind Cloudflare).
 
----
-## Projects Using No-as-a-Service
-
-Here are some projects and websites that creatively integrate [no-as-a-service](https://naas.isalman.dev/no) to deliver humorous or programmatic "no" responses:
-
-1. **[no-as-a-service-rust](https://github.com/ZAZPRO/no-as-a-service-rust)**  
-   Rust implementation of this project.
-
-2. **[CSG Admins](https://csg-admins.de)**  
-   A system administration and gaming service hub using no-as-a-service to provide playful negative responses across some admin panels and commands.
-
-3. **[FunnyAnswers - /no endpoint](https://www.funnyanswers.lol/no)**  
-   A humor-focused API playground that includes a mirror or wrapper for no-as-a-service, perfect for developers exploring fun HTTP-based responses.
-
-4. **[Gerador de Frases Aleatórias (pt-BR)](https://github.com/timeuz/frases-aleatorias)**
-   Uma reinterpretação em Python com frases em português, frontend e novas categorias.
-
-5. **[NoAsAnApp](https://github.com/omar-jarid/NoAsAnApp)**  
-   A simple native Android app calling no-as-a-service to provide negative responses.
-
-6. **[Your Project Here?](https://github.com/YOUR_REPO)**  
-   If you're using no-as-a-service in your project, open a pull request to be featured here!
-
----
-
-> Want to use no-as-a-service in your own project? Check out the usage section in this README and start returning **"no"** like a pro.
 ---
 
 ## 👤 Author
 
-Created with creative stubbornness by [hotheadhacker](https://github.com/hotheadhacker)
+Forked and maintained by [pjmeca](https://github.com/pjmeca), adapted from [hotheadhacker](https://github.com/hotheadhacker).
 
 ---
 
