@@ -146,6 +146,8 @@ NoAsAService/
 
 Forked and maintained by [pjmeca](https://github.com/pjmeca), adapted from [hotheadhacker](https://github.com/hotheadhacker).
 
+<a href="https://www.flaticon.com/packs/countrys-flags" title="flag icons">Flag icons created by Freepik - Flaticon</a>.
+
 ---
 
 ## 📄 License
