@@ -35,6 +35,20 @@ pipeline {
             }
         }
 
+        stage('Docker Hub Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials',
+                                                  usernameVariable: 'DOCKER_USER',
+                                                  passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${env.TS}
+                        docker push ${IMAGE_NAME}:latest
+                    """
+                }
+            }
+        }
+
         stage('Docker Deploy') {
             steps {
                 sh """
