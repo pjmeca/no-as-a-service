@@ -39,23 +39,28 @@ Use it in apps, bots, landing pages, Slack integrations, rejection letters, or w
 
 ### 🌍 Multi-language support
 
-This version supports **multiple languages**.
-
-The language can be selected using the `lang` query parameter:
+This version supports **multiple languages**, selectable via the `lang` query parameter:
 
 ```http
 GET /?lang=en
 GET /?lang=es
-```
+GET /?lang={code}
+````
 
-At the moment, the following languages are available:
+Currently available languages:
 
-* 🇬🇧 English (`en`)
+* 🇬🇧 English (`en`) – default
 * 🇪🇸 Spanish (`es`)
+* 🇩🇪 German (`de`)
+* 🇷🇺 Russian (`ru`)
 
 If no `lang` parameter is provided, *English* is used by default.
 
-Each language is backed by its own text file inside the `reasons/` directory, making it easy to add new languages without changing any code.
+Each language has its own text file inside the `reasons/` directory, making it easy to add new languages without changing any code.
+
+### 🙏 Acknowledgements
+
+Special thanks to [akicool](https://github.com/akicool) for contributing the German (`de`) and Russian (`ru`) translations in [PR #51](https://github.com/hotheadhacker/no-as-a-service/pull/51/commits/148ddca1c20fc30dd6fb3787baf9050b2a34286b) of the original repository.
 
 ---
 
