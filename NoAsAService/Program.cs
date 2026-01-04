@@ -4,8 +4,17 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load from JSON
-HashSet<string> languages = ["en", "es"];
+// Load languages
+const string defaultLanguage = "en";
+HashSet<string> languages = Directory.GetFiles("reasons")
+    .Select(Path.GetFileNameWithoutExtension)
+    .ToHashSet()!;
+if (!languages.Contains(defaultLanguage))
+{
+    throw new ApplicationException($"The default language ({defaultLanguage}) does not exist.");    
+}
+
+// Read files
 var reasons = languages.ToDictionary(
     x => x,
     x => File.ReadAllLines(Path.Combine("reasons", $"{x}.txt"), Encoding.UTF8)
@@ -83,7 +92,7 @@ app.UseRateLimiter();
 // Endpoint
 app.MapGet("/", (string? lang = null) =>
 {
-    var language = lang ?? languages.First();
+    var language = lang ?? defaultLanguage;
     if (!languages.Contains(language))
     {
         return Results.BadRequest("Invalid language");
