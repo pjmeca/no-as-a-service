@@ -89,19 +89,19 @@ app.UseSwaggerUI(c =>
 // Use rate limiter
 app.UseRateLimiter();
 
-// Endpoint
-app.MapGet("/", (string? lang = null) =>
+app.MapGet("/", (HttpContext ctx, string? lang = null) =>
 {
+    // Avoid caching the response
+    ctx.Response.Headers["Cache-Control"] = "no-store";
+    
     var language = lang ?? defaultLanguage;
     if (!languages.Contains(language))
     {
         return Results.BadRequest("Invalid language");
     }
 
-    var random = new Random();
-    var reason = reasons[language][random.Next(reasons[language].Length)];
+    var reason = reasons[language][Random.Shared.Next(reasons[language].Length)];
     return Results.Text(reason, "text/plain", Encoding.UTF8, StatusCodes.Status200OK);
-})
-.RequireRateLimiting("PerIp");
+}).RequireRateLimiting("PerIp");
 
 app.Run();
