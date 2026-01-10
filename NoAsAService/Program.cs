@@ -1,14 +1,18 @@
-﻿using System.Text;
+﻿using System.Collections.Frozen;
+using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 using Microsoft.OpenApi.Models;
+using NoAsAService.Models;
+using NoAsAService.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load languages
 const string defaultLanguage = "en";
-HashSet<string> languages = Directory.GetFiles("reasons")
+FrozenSet<string> languages = Directory.GetFiles("reasons")
     .Select(Path.GetFileNameWithoutExtension)
-    .ToHashSet()!;
+    .ToFrozenSet()!;
 if (!languages.Contains(defaultLanguage))
 {
     throw new ApplicationException($"The default language ({defaultLanguage}) does not exist.");    
@@ -19,7 +23,8 @@ var reasons = languages.ToDictionary(
     x => x,
     x => File.ReadAllLines(Path.Combine("reasons", $"{x}.txt"), Encoding.UTF8)
         .Where(line => !string.IsNullOrWhiteSpace(line))
-        .ToArray());
+        .ToArray()
+);
 
 // Configure rate-limit: 120 req/min by IP (or CF-Connecting-IP)
 builder.Services.AddRateLimiter(options =>
@@ -52,6 +57,11 @@ builder.Services.AddRateLimiter(options =>
             });
     });
 });
+
+// Configure Json Serialization
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default)
+);
 
 // Swagger
 #if !NATIVEAOT
@@ -89,7 +99,11 @@ app.UseSwaggerUI(c =>
 // Use rate limiter
 app.UseRateLimiter();
 
-app.MapGet("/", (HttpContext ctx, string? lang = null) =>
+// Endpoints
+var preSerializedJsonValues = PreSerialize();
+app.MapGet("/", () => Results.Text(preSerializedJsonValues.EndpointIndex, "application/json", Encoding.UTF8)).RequireRateLimiting("PerIp");
+app.MapGet("/langs", () => Results.Text(preSerializedJsonValues.OrderedLanguages, "application/json", Encoding.UTF8)).RequireRateLimiting("PerIp");
+app.MapGet("/no", (HttpContext ctx, string? lang = null) =>
 {
     // Avoid caching the response
     ctx.Response.Headers["Cache-Control"] = "no-store";
@@ -105,3 +119,48 @@ app.MapGet("/", (HttpContext ctx, string? lang = null) =>
 }).RequireRateLimiting("PerIp");
 
 app.Run();
+return;
+
+// Pre-serialize to reduce on demand CPU usage & latency
+PreSerializedJsonValues PreSerialize()
+{
+    PreSerializedJsonValues result = new()
+    {
+        OrderedLanguages = JsonSerializer.Serialize(
+            languages.OrderBy(x => x).ToArray(),
+            AppJsonContext.Default.StringArray
+        )
+    };
+
+    // Wait for the App to be started before retrieving all the endpoints
+    app.Lifetime.ApplicationStarted.Register(() =>
+    {
+        var dataSource = app.Services.GetRequiredService<EndpointDataSource>();
+
+        var endpointIndex = dataSource.Endpoints
+            .OfType<RouteEndpoint>()
+            .Where(e => e.RoutePattern.RawText != "/")
+            .Select(e => new EndpointSummary
+            {
+                Route = e.RoutePattern.RawText!,
+                Methods = e.Metadata
+                    .OfType<HttpMethodMetadata>()
+                    .SelectMany(m => m.HttpMethods)
+                    .Distinct()
+                    .ToArray()
+            })
+            .ToArray();
+
+        if (endpointIndex.Length == 0)
+        {
+            throw new ApplicationException("No endpoints were found.");
+        }
+    
+        result.EndpointIndex = JsonSerializer.Serialize(
+            endpointIndex, 
+            AppJsonContext.Default.EndpointSummaryArray
+        );
+    });
+
+    return result;
+}
